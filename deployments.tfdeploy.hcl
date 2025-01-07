@@ -12,7 +12,7 @@ identity_token "k8s" {
 deployment "development" {
   inputs = {
     aws_identity_token = identity_token.aws.jwt
-    role_arn            = "arn:aws:iam::273354657067:role/stacks-yuzhao-terraform-Learn-Terraform-Stacks-deferred-actions"
+    role_arn            = "arn:aws:iam::273354657067:role/tfstacks-role"
     regions             = ["us-east-1"]
     vpc_name = "vpc-dev2"
     vpc_cidr = "10.0.0.0/16"
@@ -38,7 +38,7 @@ deployment "development" {
 deployment "prod" {
   inputs = {
     aws_identity_token = identity_token.aws.jwt
-    role_arn            = "arn:aws:iam::273354657067:role/stacks-yuzhao-terraform-Learn-Terraform-Stacks-deferred-actions"
+    role_arn            = "arn:aws:iam::273354657067:role/tfstacks-role"
     regions             = ["us-east-1", "us-west-2"]
     vpc_name = "vpc-prod2"
     vpc_cidr = "10.20.0.0/16"

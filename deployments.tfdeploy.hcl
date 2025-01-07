@@ -1,5 +1,6 @@
 identity_token "aws" {
-  audience = ["terraform-stacks-private-preview"]
+//  audience = ["terraform-stacks-private-preview"]
+  audience = ["aws.workload.identity"]
 }
 
 identity_token "k8s" {

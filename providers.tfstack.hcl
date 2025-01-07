@@ -13,6 +13,11 @@ required_providers {
     source  = "hashicorp/kubernetes"
     version = "~> 2.25"
   }
+  
+  random = {
+    source  = "hashicorp/random"
+    version = "~> 3.0" # Adjust based on your requirements
+  }
 
   time = {
     source = "hashicorp/time"

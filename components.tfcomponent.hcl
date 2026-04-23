@@ -114,3 +114,11 @@ component "deploy-hashibank" {
     time = provider.time.this
   }
 }
+
+# This is the new, critical block, It formally exposes the VPC ID
+# from the 'vpc' component as a top-level stack output.
+output "published_vpc_id" {
+  description = "The ID of teh VPC from the development deployment"
+  type        = string
+  value       = component.vpc["us-east-1"].vpc_id
+}

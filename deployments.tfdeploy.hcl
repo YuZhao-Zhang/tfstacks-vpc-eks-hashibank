@@ -7,6 +7,29 @@ identity_token "k8s" {
   audience = ["k8s.workload.identity"]
 }
 
+published_output "vpc_id" {
+  value = deployment.development.published_vpc_id
+}
+
+deployment_auto_approve "safe_dev_plans" {
+  check {
+      # Only auto-approve in the development environment if no resources are being removed
+      condition    = context.plan.changes.remove == 0 
+      reason       = "Plan has ${context.plan.changes.remove} resources to be removed. Mannual approval required."
+  }
+}
+
+deployment_group "dev_group" {
+  # The dev group uses the auto-approve checks defined below
+  auto_aprrove_checks = [
+    deployment_auto_approve.safe_dev_plans
+  ]  
+}
+
+deployment_group "prod_group" {
+  #The prod group does not use any auto-approve checks, so it will always require manual approval
+  auto_aprrove_checks = []  
+}
 
 deployment "development" {
   inputs = {
@@ -60,10 +83,13 @@ deployment "prod" {
   }
 }
 
-orchestrate "auto_approve" "safe_plans_dev" {
+
+
+
+/* orchestrate "auto_approve" "safe_plans_dev" {
   check {
       # Only auto-approve in the development environment if no resources are being removed
       condition = context.plan.changes.remove == 0 && context.plan.deployment == deployment.development
       reason = "Plan has ${context.plan.changes.remove} resources to be removed."
   }
-}
+} */

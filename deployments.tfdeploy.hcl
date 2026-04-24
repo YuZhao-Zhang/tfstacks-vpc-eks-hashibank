@@ -72,7 +72,7 @@ deployment "prod" {
   inputs = {
     aws_identity_token        = identity_token.aws.jwt
     role_arn                  = "arn:aws:iam::273354657067:role/tfstacks-role"
-    regions                   = ["us-east-1"]
+    regions                   = ["us-east-1", "us-west-2"]
     vpc_name                  = "aeyuthirai-prod"
     vpc_cidr                  = "10.20.0.0/16"
     kubernetes_version        = "1.30"

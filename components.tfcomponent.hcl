@@ -1,3 +1,5 @@
+# This file defines the "what" - the building blocks of our stack.
+
 #AWS VPC
 component "vpc" {
   for_each = var.regions
@@ -29,6 +31,8 @@ component "eks" {
     tfc_kubernetes_audience = var.tfc_kubernetes_audience
     eks_clusteradmin_arn = var.eks_clusteradmin_arn
     eks_clusteradmin_username = var.eks_clusteradmin_username
+    role_arn = var.role_arn
+
   }
 
   providers = {
@@ -40,22 +44,24 @@ component "eks" {
   }
 }
 
-# Update K8s role-binding
+# k8s RBAC (create clusterrolebinding using EKS token)
 component "k8s-rbac" {
   for_each = var.regions
-
-  source = "./k8s-rbac"
+  source   = "./k8s-rbac"
 
   inputs = {
-    cluster_endpoint = component.eks[each.value].cluster_endpoint
+    cluster_endpoint      = component.eks[each.value].cluster_endpoint
+    cluster_certificate_authority_data = component.eks[each.value].cluster_certificate_authority_data
+    eks_token             = component.eks[each.value].eks_token
     tfc_organization_name = var.tfc_organization_name
   }
 
   providers = {
-    kubernetes  = provider.kubernetes.configurations[each.value]
+    kubernetes = provider.kubernetes.configurations[each.value]
   }
-}
 
+  depends_on = [component.eks]
+}
 
 # K8s Addons - aws load balancer controller, coredns, vpc-cni, kube-proxy
 component "k8s-addons" {
@@ -64,23 +70,25 @@ component "k8s-addons" {
   source = "./aws-eks-addon"
 
   inputs = {
-    cluster_name = component.eks[each.value].cluster_name
-    vpc_id = component.vpc[each.value].vpc_id
-    private_subnets = component.vpc[each.value].private_subnets
-    cluster_endpoint = component.eks[each.value].cluster_endpoint
-    cluster_version = component.eks[each.value].cluster_version
-    oidc_provider_arn = component.eks[each.value].oidc_provider_arn
-    cluster_certificate_authority_data = component.eks[each.value].cluster_certificate_authority_data
-    oidc_binding_id = component.k8s-rbac[each.value].oidc_binding_id
+    cluster_name                         = component.eks[each.value].cluster_name
+    vpc_id                               = component.vpc[each.value].vpc_id
+    private_subnets                       = component.vpc[each.value].private_subnets
+    cluster_endpoint                     = component.eks[each.value].cluster_endpoint
+    cluster_version                      = component.eks[each.value].cluster_version
+    cluster_certificate_authority_data   = component.eks[each.value].cluster_certificate_authority_data
+    oidc_provider_arn                    = component.eks[each.value].oidc_provider_arn
+    oidc_binding_id                      = component.k8s-rbac[each.value].oidc_binding_id
   }
 
   providers = {
-    kubernetes  = provider.kubernetes.oidc_configurations[each.value]
-    helm  = provider.helm.oidc_configurations[each.value]
-    aws    = provider.aws.configurations[each.value]
-    time = provider.time.this
-    random = provider.random.this
+    kubernetes  = provider.kubernetes.configurations[each.value]
+    helm        = provider.helm.configurations[each.value]
+    aws         = provider.aws.configurations[each.value]
+    time        = provider.time.this
   }
+
+  # ensure the RBAC binding is created first so CRD/helm installs run with cluster-admin privileges
+  depends_on = [component.k8s-rbac]
 }
 
 # Namespace
@@ -95,8 +103,11 @@ component "k8s-namespace" {
   }
 
   providers = {
-    kubernetes  = provider.kubernetes.oidc_configurations[each.value]
+    kubernetes  = provider.kubernetes.configurations[each.value]
   }
+
+  # wait until the RBAC clusterrolebinding for the TFC OIDC identity exists
+  depends_on = [component.k8s-rbac]
 }
 
 # Deploy Hashibank
@@ -110,15 +121,19 @@ component "deploy-hashibank" {
   }
 
   providers = {
-    kubernetes  = provider.kubernetes.oidc_configurations[each.value]
+    kubernetes  = provider.kubernetes.configurations[each.value]
     time = provider.time.this
   }
+
+  # ensure namespace and RBAC are present before deploying resources
+  depends_on = [component.k8s-rbac, component.k8s-namespace]
 }
 
-# This is the new, critical block, It formally exposes the VPC ID
-# from the 'vpc' component as a top-level stack output.
+# This is the new, critical block. It formally exposes the VPC ID
+# from the 'vpc' component as a top-level Stack output.
+# Still commented out for now.
 output "published_vpc_id" {
-  description = "The ID of teh VPC from the development deployment"
+  description = "The ID of the VPC from the development deployment."
   type        = string
   value       = component.vpc["us-east-1"].vpc_id
 }

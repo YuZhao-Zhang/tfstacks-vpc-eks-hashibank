@@ -62,7 +62,7 @@ component "k8s-rbac" {
     kubernetes = provider.kubernetes.configurations[each.value]
   }
 
-  depends_on = [component.eks]
+  #depends_on = [component.eks]
 
 }
 
@@ -92,7 +92,7 @@ component "k8s-addons" {
   }
 
   # ensure the RBAC binding is created first so CRD/helm installs run with cluster-admin privileges
-  depends_on = [component.k8s-rbac]
+  #depends_on = [component.k8s-rbac]
 }
 
 # Namespace
@@ -111,7 +111,7 @@ component "k8s-namespace" {
   }
 
   # wait until the RBAC clusterrolebinding for the TFC OIDC identity exists
-  depends_on = [component.k8s-rbac]
+  #depends_on = [component.k8s-rbac]
 }
 
 # Deploy Hashibank
@@ -130,10 +130,7 @@ component "deploy-hashibank" {
   }
 
   # ensure namespace and RBAC are present before deploying resources
-  depends_on = [
-    component.k8s-rbac,
-    component.k8s-namespace
-  ]
+  #depends_on = [component.k8s-rbac, component.k8s-namespace]
 }
 
 # This is the new, critical block. It formally exposes the VPC ID

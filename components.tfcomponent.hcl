@@ -63,6 +63,7 @@ component "k8s-rbac" {
   }
 
   depends_on = [component.eks]
+
 }
 
 # K8s Addons - aws load balancer controller, coredns, vpc-cni, kube-proxy
@@ -130,7 +131,6 @@ component "deploy-hashibank" {
 
   # ensure namespace and RBAC are present before deploying resources
   depends_on = [
-    component.k8s-addons,
     component.k8s-rbac,
     component.k8s-namespace
   ]

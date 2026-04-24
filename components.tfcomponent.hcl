@@ -43,8 +43,7 @@ component "eks" {
     tls = provider.tls.this
     null = provider.null.this
   }
-
-  depends_on = [component.deploy-hashibank, component.k8s-addons, component.k8s-rbac, component.k8s-namespace]
+ 
 }
 
 # k8s RBAC (create clusterrolebinding using EKS token)
@@ -130,7 +129,11 @@ component "deploy-hashibank" {
   }
 
   # ensure namespace and RBAC are present before deploying resources
-  depends_on = [component.k8s-addons,component.k8s-rbac, component.k8s-namespace]
+  depends_on = [
+    component.k8s-addons,
+    component.k8s-rbac,
+    component.k8s-namespace
+  ]
 }
 
 # This is the new, critical block. It formally exposes the VPC ID

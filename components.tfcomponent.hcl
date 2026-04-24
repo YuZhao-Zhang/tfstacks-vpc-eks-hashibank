@@ -85,6 +85,7 @@ component "k8s-addons" {
     helm        = provider.helm.configurations[each.value]
     aws         = provider.aws.configurations[each.value]
     time        = provider.time.this
+    random     = provider.random.this
   }
 
   # ensure the RBAC binding is created first so CRD/helm installs run with cluster-admin privileges

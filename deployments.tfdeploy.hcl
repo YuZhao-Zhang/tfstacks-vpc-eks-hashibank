@@ -7,7 +7,7 @@ identity_token "k8s" {
   audience = ["k8s.workload.identity"]
 }
 
-published_output "vpc_id" {
+publish_output "vpc_id" {
   value = deployment.development.published_vpc_id
 }
 
@@ -21,14 +21,14 @@ deployment_auto_approve "safe_dev_plans" {
 
 deployment_group "dev_group" {
   # The dev group uses the auto-approve checks defined below
-  auto_aprrove_checks = [
+  auto_approve_checks = [
     deployment_auto_approve.safe_dev_plans
   ]  
 }
 
 deployment_group "prod_group" {
   #The prod group does not use any auto-approve checks, so it will always require manual approval
-  auto_aprrove_checks = []  
+  auto_approve_checks = []  
 }
 
 deployment "development" {

@@ -38,7 +38,7 @@ component "eks" {
   providers = {
     aws    = provider.aws.configurations[each.value]
     cloudinit = provider.cloudinit.this
-    kubernetes  = provider.kubernetes.this
+    #kubernetes  = provider.kubernetes.this
     time = provider.time.this
     tls = provider.tls.this
     null = provider.null.this

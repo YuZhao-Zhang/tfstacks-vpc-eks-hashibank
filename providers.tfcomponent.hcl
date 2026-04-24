@@ -13,11 +13,6 @@ required_providers {
     source  = "hashicorp/kubernetes"
     version = "~> 2.25"
   }
-  
-  random = {
-    source  = "hashicorp/random"
-    version = "~> 3.0" # Adjust based on your requirements
-  }
 
   time = {
     source = "hashicorp/time"
@@ -39,6 +34,11 @@ required_providers {
     version = "~> 2.4"
   }
 
+  random = {
+    source = "hashicorp/random"
+    version = "~> 3.7.0"
+  }
+
 }
 
 provider "aws" "configurations" {
@@ -54,14 +54,12 @@ provider "aws" "configurations" {
   }
 }
 
-
-
 provider "kubernetes" "configurations" {
   for_each = var.regions
   config { 
     host                   = component.eks[each.value].cluster_endpoint
     cluster_ca_certificate = base64decode(component.eks[each.value].cluster_certificate_authority_data)
-    token   = component.eks[each.value].eks_token
+    token                  = component.eks[each.value].eks_token
   }
 }
 
@@ -71,6 +69,17 @@ provider "kubernetes" "oidc_configurations" {
     host                   = component.eks[each.value].cluster_endpoint
     cluster_ca_certificate = base64decode(component.eks[each.value].cluster_certificate_authority_data)
     token   = var.k8s_identity_token
+  }
+}
+
+provider "helm" "configurations" {
+  for_each = var.regions
+  config {
+    kubernetes {
+      host                   = component.eks[each.value].cluster_endpoint
+      cluster_ca_certificate = base64decode(component.eks[each.value].cluster_certificate_authority_data)
+      token   = component.eks[each.value].eks_token
+    }
   }
 }
 
@@ -84,7 +93,6 @@ provider "helm" "oidc_configurations" {
     }
   }
 }
-
 
 provider "cloudinit" "this" {}
 provider "kubernetes" "this" {}

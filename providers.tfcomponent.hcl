@@ -1,7 +1,7 @@
 required_providers {
   aws = {
     source  = "hashicorp/aws"
-    version = "~> 5.0"
+    version = "~> 5.99"
   }
 
   cloudinit = {
@@ -39,6 +39,10 @@ required_providers {
     version = "~> 3.7.0"
   }
 
+  null = {
+    source  = "hashicorp/null"
+    version = "~> 3.2"
+  }
 }
 
 provider "aws" "configurations" {
@@ -100,3 +104,4 @@ provider "time" "this" {}
 provider "tls" "this" {}
 provider "local" "this" {}
 provider "random" "this" {}
+provider "null" "this" {}
